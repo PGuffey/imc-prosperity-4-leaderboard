@@ -20,7 +20,8 @@ export default tseslint.config(
         ...globals.node,
       },
     },
-    ignores: ['*.html'],
+    ignores: ['*.html', 'scripts/fetch-leaderboard.ts'],
+
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/explicit-member-accessibility': 'error',

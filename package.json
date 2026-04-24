@@ -9,11 +9,11 @@
     "preview": "vite preview",
     "process": "tsx data/process.ts",
     "lint": "pnpm run \"/^lint:.*/\"",
-    "lint:eslint": "eslint --format codeframe '**/*.ts'",
-    "lint:prettier": "prettier --check '**/*.{ts,js,css,html,json,yml}'",
+    "lint:eslint": "eslint --format codeframe \"**/*.ts\"",
+    "lint:prettier": "prettier --check \"**/*.{ts,js,css,html,json,yml}\"",
     "fix": "pnpm run --sequential \"/^fix:.*/\"",
     "fix:eslint": "pnpm lint:eslint --fix",
-    "fix:prettier": "prettier --write '**/*.{ts,js,css,html,json,yml}'"
+    "fix:prettier": "prettier --write \"**/*.{ts,js,css,html,json,yml}\""
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans": "^5.2.5",
