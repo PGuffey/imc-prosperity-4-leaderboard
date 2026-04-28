@@ -49,6 +49,8 @@ const countryCodeFormatter = new Intl.DisplayNames(['en'], { type: 'region' });
 const interplanetarySnapshots = [
   { label: 'Phase 1 Final Scores', directory: 'round2', phase: 1 },
   { label: 'Round 3', directory: 'round3', phase: 2 },
+  { label: 'Round 4', directory: 'round4', phase: 2 },
+
 
 ];
 
