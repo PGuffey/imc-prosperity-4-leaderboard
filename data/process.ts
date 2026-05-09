@@ -50,13 +50,19 @@ const interplanetarySnapshots = [
   { label: 'Phase 1 Final Scores', directory: 'round2', phase: 1 },
   { label: 'Round 3', directory: 'round3', phase: 2 },
   { label: 'Round 4', directory: 'round4', phase: 2 },
-
-
+  { label: 'Phase 2 Final Scores', directory: 'round5', phase: 2 },
 ];
 
 const processedCrews: Record<string, ProcessedCrew> = {};
 const processedRounds: Round[] = [];
 const PHASE_2_CUTOFF = 200000;
+
+// Qualified crews should be locked from Phase 1 final scores only.
+// Do not recompute this from Round 3, Round 4, or Round 5.
+const phaseOneFinalOverall = readFile<InterplanetaryLeaderboardItem[]>('round2/overall.json');
+const phaseOneQualifiedCrews = phaseOneFinalOverall.filter(
+  item => item.score >= PHASE_2_CUTOFF,
+).length;
 
 function ensureCrew(item: InterplanetaryLeaderboardItem, roundCount: number): ProcessedCrew {
   const id = item.team.id;
@@ -65,7 +71,9 @@ function ensureCrew(item: InterplanetaryLeaderboardItem, roundCount: number): Pr
     processedCrews[id] = {
       id,
       name: item.team.name,
-      country: countryCodeFormatter.of(item.team.countryCode)?.replace('Hong Kong SAR China', 'Hong Kong') ?? item.team.countryCode,
+      country:
+        countryCodeFormatter.of(item.team.countryCode)?.replace('Hong Kong SAR China', 'Hong Kong') ??
+        item.team.countryCode,
       results: new Array(roundCount).fill(null),
     };
   }
@@ -84,7 +92,7 @@ for (let i = 0; i < interplanetarySnapshots.length; i++) {
     label,
     registeredTeams: overall.length,
     rankedTeams: overall.length,
-    qualifiedCrews: overall.filter(item => item.score >= PHASE_2_CUTOFF).length,
+    qualifiedCrews: phaseOneQualifiedCrews,
   });
 
   for (const item of overall) {
@@ -141,7 +149,7 @@ function getValueDeltaPair(
   if (interplanetarySnapshots[round].phase !== interplanetarySnapshots[round - 1]?.phase) {
     return [currentValue, null];
   }
-  
+
   const previousResult = results[round - 1];
   if (previousResult === null || previousResult === undefined) return [currentValue, null];
 
