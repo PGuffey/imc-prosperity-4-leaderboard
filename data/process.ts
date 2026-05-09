@@ -39,6 +39,14 @@ function readFile<T>(relativePath: string): T {
   return JSON.parse(content);
 }
 
+function readRoundFile(relativePath: string): InterplanetaryLeaderboardItem[] {
+  const data = readFile<InterplanetaryLeaderboardItem[] | { items: InterplanetaryLeaderboardItem[] }>(
+    relativePath,
+  );
+
+  return Array.isArray(data) ? data : data.items;
+}
+
 function writeFile(relativePath: string, content: string): void {
   const absolutePath = path.resolve(import.meta.dirname, relativePath);
   fs.writeFileSync(absolutePath, content);
@@ -47,18 +55,19 @@ function writeFile(relativePath: string, content: string): void {
 const countryCodeFormatter = new Intl.DisplayNames(['en'], { type: 'region' });
 
 const interplanetarySnapshots = [
+  { label: 'Round 1', directory: 'round1', phase: 1 },
   { label: 'Phase 1 Final Scores', directory: 'round2', phase: 1 },
   { label: 'Round 3', directory: 'round3', phase: 2 },
   { label: 'Round 4', directory: 'round4', phase: 2 },
   { label: 'Phase 2 Final Scores', directory: 'round5', phase: 2 },
 ];
 
+const phaseOneFinalIndex = interplanetarySnapshots
+  .map(snapshot => snapshot.phase)
+  .lastIndexOf(1);
 const processedCrews: Record<string, ProcessedCrew> = {};
 const processedRounds: Round[] = [];
 const PHASE_2_CUTOFF = 200000;
-
-// Qualified crews should be locked from Phase 1 final scores only.
-// Do not recompute this from Round 3, Round 4, or Round 5.
 const phaseOneFinalOverall = readFile<InterplanetaryLeaderboardItem[]>('round2/overall.json');
 const phaseOneQualifiedCrews = phaseOneFinalOverall.filter(
   item => item.score >= PHASE_2_CUTOFF,
@@ -84,9 +93,9 @@ function ensureCrew(item: InterplanetaryLeaderboardItem, roundCount: number): Pr
 for (let i = 0; i < interplanetarySnapshots.length; i++) {
   const { label, directory } = interplanetarySnapshots[i];
 
-  const overall = readFile<InterplanetaryLeaderboardItem[]>(`${directory}/overall.json`);
-  const manual = readFile<InterplanetaryLeaderboardItem[]>(`${directory}/manual.json`);
-  const algo = readFile<InterplanetaryLeaderboardItem[]>(`${directory}/algo.json`);
+  const overall = readRoundFile(`${directory}/overall.json`);
+  const manual = readRoundFile(`${directory}/manual.json`);
+  const algo = readRoundFile(`${directory}/algo.json`);
 
   processedRounds.push({
     label,
@@ -175,7 +184,7 @@ for (const crew of Object.values(processedCrews)) {
     row.push(...getValueDeltaPair(crew.results, round, 'algo', 'score'));
   }
 
-  const phaseOneFinalResult = crew.results.find((_, index) => interplanetarySnapshots[index].phase === 1);
+  const phaseOneFinalResult = crew.results[phaseOneFinalIndex];
   const qualifiedForPhase2 = (phaseOneFinalResult?.overall?.score ?? -Infinity) >= PHASE_2_CUTOFF;
 
   row.push(qualifiedForPhase2);
